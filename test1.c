@@ -7,47 +7,54 @@
 #include<fcntl.h>
 #include<errno.h>
 #include<unistd.h>
+#include<math.h>
 #include<sys/ipc.h>
 #include<sys/shm.h>
 #include <semaphore.h>
 
-#define len 8
 #define num 50
-#define semfile "semaphorefile"
+#define index 8
+#define file "sem"
+struct timespec a1;
+struct timespec a2;
 
-
-void acquire(char** sem){
-    while(strcmp(*sem,"wait")==0){
+int min(int x, int y)
+{
+    if(x>y)
+    {
+        return y;
+    }
+    else{
+        return x;
     }
 }
-
-void release(char** sem){
-    strcpy(*sem,"wait");
+void leave(char** s)
+{
+    strcpy(*s,"waiting");
+}
+void capture(char** s)
+{
+    while(strcmp(*s,"waiting")==0){}
 }
 
-int min(int a , int b){
-    if(a>b) return b;
-    else return a;
-}
+int main()
+{
+    char* temp = (char*)malloc((index)*sizeof(char));
+    key_t passwd = ftok("SharedMemory",50);
+    int id = shmget(passwd,1024,0666|IPC_CREAT);
+    temp = (char*)shmat(id,NULL,0);
+    int var = 0;
+    while(var<50){
+        int b = var;
+        for(;b<min(var+5,num);b++){
+            capture(&temp);
+            printf("received by p2 : %s\n",temp);
+            leave(&temp);
 
-
-int main(){
-    char* send=(char*)malloc((len)*sizeof(char));
-    key_t key = ftok("shmfile",50);
-    int shmid = shmget(key,1024,0666|IPC_CREAT);
-
-    send = (char*)shmat(shmid,NULL,0);
-
-    int curr=0;
-    while(curr<num){
-        int i=curr;
-        for(;i<min(curr+5,num);i++){
-            acquire(&send);
-            printf("received by p2 : %s\n",send);
-            release(&send);
         }
-        curr+=5;
+        var+=5;
     }
-
+    clock_gettime(CLOCK_REALTIME,&a2);
+    printf("Exexution time = %f\n",fabs(((a2.tv_sec - a1.tv_sec)+(a2.tv_nsec - a1.tv_nsec))/1e9));
     return 0;
 }
