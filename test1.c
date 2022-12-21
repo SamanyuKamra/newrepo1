@@ -80,9 +80,10 @@ int main(int argc, char const *argv[])
         if (curr_index>48){
             break;
         }
-        clock_gettime(CLOCK_REALTIME,&a2);
-        printf("Exexution time = %f\n",fabs(((a2.tv_sec - a1.tv_sec)+(a2.tv_nsec - a1.tv_nsec))/1e9));
+
 
 	}
+	clock_gettime(CLOCK_REALTIME,&a2);
+        printf("Exexution time = %f\n",fabs(((a2.tv_sec - a1.tv_sec)+(a2.tv_nsec - a1.tv_nsec))/1e9));
 	return 0;
 }
