@@ -74,15 +74,17 @@ int main()
     int id = shmget(passwd,1024,0666|IPC_CREAT);
 
     temp = (char*) shmat(id,NULL,0);
-    int a = 0;
-    for(a=0;a<num;)
+    
+    for(int a=0;a<num;)
     {
-        while(a<min(a+5,num))
+        int d = a;
+        while(d<min(a+5,num))
         {
-            strcpy(temp,arr[a]);
+            strcpy(temp,arr[d]);
             capture(&temp);
-            a++;
+            d++;
         }
+        a=d
         printf("MAX ID received by p1: %d\n",a-1);
     }
     return 0;
