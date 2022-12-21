@@ -1,78 +1,89 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<time.h>
-#include<sys/stat.h>
-#include<sys/types.h>
-#include<fcntl.h>
 #include<errno.h>
 #include<unistd.h>
 #include<sys/ipc.h>
 #include<sys/shm.h>
 #include <semaphore.h>
+#include<time.h>
+#include<sys/stat.h>
+#include<sys/types.h>
+#include<fcntl.h>
 
-#define len 9
+
 #define num 50
+struct timespec a1;
+#define index 9
 
-
-void acquire(char** sem){
-    while(strcmp(*sem,"wait")!=0){
+int min(int x, int y)
+{
+    if(x>y)
+    {
+        return y;
+    }
+    else{
+        return x;
     }
 }
-
-void release(char** sem){
-    strcpy(*sem,"");
+void leave(char** s)
+{
+    strcpy(*s,"");
+}
+void capture(char** s)
+{
+    while(strcmp(*s,"waiting")!=0){}
 }
 
-int min(int a , int b){
-    if(a>b) return b;
-    else return a;
-}
-
-int main(){
-    srand(time(NULL));
-    char* msg[50];
-    for(int i=0;i<num;i++){
-        msg[i] = (char*)malloc((len)*sizeof(char));
-    }
-    //  generate_strings
-    for(int i=0;i<num;i++){
-        int j;
-        if(i>=10){
-            j=3;
-            msg[i][0] = '0'+i/10;
-            msg[i][1] = '0'+i%10;
-            msg[i][2] =' ';
-        }
-        else {
-            j=2;
-            msg[i][0] = '0' + i;
-            msg[i][1] = ' ';
-        }
-
-        while( (j) <= len-2){
-            msg[i][j] = rand()%26 + 65;
-            j++;
-        }
-        msg[i][len-1]='\0';
+int main()
+{
+    
+    clock_gettime(CLOCK_REALTIME,&a1);
+    char* arr[50];
+    int i;
+    for(i = 0;i<num;i++)
+    {
+        arr[i] = (char*)malloc((index)*sizeof(char));
     }
 
-
-    char* send=(char*)malloc(sizeof(msg[0]));
-    key_t key = ftok("shmfile",50);
-    int shmid = shmget(key,1024,0666|IPC_CREAT);
-
-    send = (char*) shmat(shmid,NULL,0);
-    for(int i=0;i<num;){
-        int j=i;
-        while(j<min(i+5,num)){
-            strcpy(send,msg[j]);
-            acquire(&send);
-            j++;
+    for(int j = 0;j<num;j++)
+    {
+        int k;
+        if(j>=10)
+        {
+            arr[j][0] = '0'+j/10;
+            arr[j][1] = '0'+j%10;
+            arr[j][2] =' ';
+            k = 3;
         }
-        i=j;
-        printf("MAX ID received by p1: %d\n",i-1);
+        else
+        {
+            arr[j][0] = '0' + j;
+            arr[j][1] = ' ';
+            k = 2;
+        }
+        while(k < index-2)
+        {
+            arr[j][k] = rand()%26 + 65;
+            k++
+        }
+        arr[j][index-1] = '\0';
     }
+    char* temp = (char*)malloc(sizeof(arr[0]));
+    key_t passwd = ftok("SharedMemory",50);
+    int id = shmget(passwd,1024,0666|IPC_CREAT);
 
+    temp = (char*) shmat(id,NULL,0);
+    int a = 0;
+    for(a=0;a<num;)
+    {
+        while(a<min(a+5,num))
+        {
+            strcpy(temp,arr[a]);
+            capture(&temp);
+            a++;
+        }
+        printf("MAX ID received by p1: %d\n",a-1);
+    }
     return 0;
 }
