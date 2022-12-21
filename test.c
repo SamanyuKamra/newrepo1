@@ -84,7 +84,7 @@ int main()
             capture(&temp);
             d++;
         }
-        a=d
+        a=d;
         printf("MAX ID received by p1: %d\n",a-1);
     }
     return 0;
