@@ -65,7 +65,7 @@ int main()
         while(k < index-2)
         {
             arr[j][k] = rand()%26 + 65;
-            k++
+            k++;
         }
         arr[j][index-1] = '\0';
     }
