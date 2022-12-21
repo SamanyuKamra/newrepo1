@@ -7,7 +7,7 @@
 #include<fcntl.h>
 #include<errno.h>
 #include<unistd.h>
-#include<sys/ipc.h>cd
+#include<sys/ipc.h>
 #include<sys/shm.h>
 #include <semaphore.h>
 
